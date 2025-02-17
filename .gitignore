@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-config.h
-=======
 # Prerequisites
 *.d
 
@@ -33,4 +30,4 @@ config.h
 *.exe
 *.out
 *.app
->>>>>>> main
+config.h
