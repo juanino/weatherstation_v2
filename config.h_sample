@@ -1,0 +1,24 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <ArduinoJson.h>        // For parsing JSON
+
+/************************* WiFi Access Point *********************************/
+
+#define WLAN_SSID       "XXXXX"
+#define WLAN_PASS       "XXXXX"
+
+// OpenWeatherMap API key
+
+const char* server = "api.openweathermap.org";  // API server URL
+const String apiKey = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";  // Replace with your OpenWeatherMap API key
+
+//ROC
+const String url = "/data/2.5/weather?lat=43.1566&lon=-77.6088&units=imperial&appid=" + apiKey;
+const String night_light = "XXXX"; // must be 4 characters
+
+// Antarctica
+// for testing negative numbers
+//const String url = "/data/2.5/weather?lon=-106.8339&lat=78.4645&units=imperial&appid=" + apiKey;
+
+const String intro_msg = "HELO";
+const String intro_msg2 = "DUDE";
