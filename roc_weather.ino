@@ -5,6 +5,13 @@
 #include <EEPROM.h>;
 #define EEPROM_SIZE 2 // 2 bytes for an int?
 
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+#include <TimeLib.h>  // Time library to manage time
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", -18000, 3600000);  // UTC offset for EST: -18000 seconds (UTC-5), update every hour
+
 unsigned long uptime = 0;  // Variable to store the uptime in milliseconds
 unsigned long rebootTime = 8L * 60L * 60L * 1000L;  // 8 hours in milliseconds
 
@@ -102,13 +109,22 @@ void setup() {
   char programStr[10];                        // Array to hold the converted string
   dtostrf(program_number, 4, 0, programStr);  // Convert the rounded integer to a string (no decimal places)
   scroll_msg2(programStr);
+
+   // Start NTP client
+  timeClient.begin();
+  timeClient.update();  // Fetch the time
+  // Set the system time using NTP
+  setTime(timeClient.getEpochTime());  // Set system time based on NTP
+  // Print the time and day of the week in EST
+  Serial.println("Time set on ESP8266:");
+  printFormattedTime();  // Print the formatted time once
 }
 
 // MAIN LOOP
 // --------------------
 void loop() {
   WeatherData w = fetch_weather();
-  if (w.error = 1) {
+  if (w.error == 1) {
     // retry fetch_weather once more after small delay
     delay(2000);
     w.error = 0;
@@ -120,10 +136,9 @@ void loop() {
 
   while (millis() - startMillis < duration) {
     print_weather(w);  // Print the weather
+    printFormattedTime();
     Serial.println("reading button....");
     read_button();
-    // Add a short delay between prints (for readability or display update rate)
-    //delay(1000);  // Delay for 1 second (you can adjust this as needed)
   }
   Serial.println("Timer loop done! Exiting loop...fetching data again");
 
@@ -377,4 +392,38 @@ void check_uptime() {
     Serial.println("8 hours elapsed. Rebooting ESP8266...");
     ESP.restart();  // Reboot the ESP8266
   }
+}
+
+// Function to print time with two digits for hours, minutes, and seconds
+void printFormattedTime() {
+  char timeBuffer[9];  // Buffer to store the formatted time (HH:MM:SS)
+
+  // Format the time (e.g., 12:05:09)
+  //sprintf(timeBuffer, "%02d:%02d:%02d", hour(), minute(), second());
+  sprintf(timeBuffer, "%02d%02d", hour(), minute());
+  // Print the formatted time
+  Serial.println("---------clock output----------------");
+  Serial.println(timeBuffer);
+  printDayOfWeek();
+  scroll_msg(timeBuffer);
+  Serial.println("---------clock output----------------");
+  delay(1000); // match to time delay for weather output
+}
+
+
+// New function to print the day of the week
+void printDayOfWeek() {
+  // Get the current time
+  time_t currentTime = now(); // `now()` returns the current time since epoch (in seconds)
+
+  // Get the day of the week as an integer (1=Sunday, 2=Monday, etc.)
+  int day = dayOfWeek(currentTime);  // Pass the current time to the dayOfWeek function
+
+  // Array of day abbreviations
+  const char* daysOfWeek[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
+  
+  // Print the day of the week
+  Serial.print("Day: ");
+  Serial.println(daysOfWeek[day - 1]);  // -1 because dayOfWeek() returns 1-7, array indices start from 0
+  scroll_msg2(daysOfWeek[day - 1]);  // Scroll the day abbreviation on the display
 }
