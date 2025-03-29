@@ -319,28 +319,28 @@ void print_weather(WeatherData w) {
     return;
   }
 
-  delay(1000);
+  delay(4000);
 
   Serial.print("feel is: ");
   Serial.println(w.feel);
   scroll_msg("FEEL");
   scroll_msg2(w.feel);
 
-  delay(1000);
+  delay(4000);
 
   Serial.print("humidty is: ");
   Serial.println(w.humidity);
   scroll_msg("-RH-");
   scroll_msg2(w.humidity);
 
-  delay(1000);
+  delay(4000);
 
   Serial.print("wind speed is:");
   Serial.println(w.wind);
   scroll_msg("WIND");
   scroll_msg2(w.wind);
 
-  delay(1000);
+  delay(4000);
 }
 
 void read_button() {
@@ -404,10 +404,12 @@ void printFormattedTime() {
   // Print the formatted time
   Serial.println("---------clock output----------------");
   Serial.println(timeBuffer);
-  printDayOfWeek();
-  scroll_msg(timeBuffer);
+  //printDayOfWeek();
+  //scroll_msg(timeBuffer);
+  printMonthAbbreviation();
+  printDayOfMonth();
   Serial.println("---------clock output----------------");
-  delay(1000); // match to time delay for weather output
+  delay(4000); // match to time delay for weather output
 }
 
 
@@ -420,10 +422,34 @@ void printDayOfWeek() {
   int day = dayOfWeek(currentTime);  // Pass the current time to the dayOfWeek function
 
   // Array of day abbreviations
-  const char* daysOfWeek[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
+  const char* daysOfWeek[] = {"SUN ", "MON ", "TUE ", "WED ", "THU ", "FRI ", "SAT "};
   
   // Print the day of the week
   Serial.print("Day: ");
   Serial.println(daysOfWeek[day - 1]);  // -1 because dayOfWeek() returns 1-7, array indices start from 0
-  scroll_msg2(daysOfWeek[day - 1]);  // Scroll the day abbreviation on the display
+  Serial.println("----------------------day of week -------");
+  //scroll_msg2(daysOfWeek[day - 1]);  // Scroll the day abbreviation on the display
+}
+
+// Function to print the month in 3-character abbreviation
+void printMonthAbbreviation() {
+  const char* months[] = {"JAN ", "FEB ", "MAR ", "APR ", "MAY ", "JUN ", "JUL ", "AUG ", "SEP ", "OCT ", "NOV ", "DEC "};
+  int currentMonth = month();
+  Serial.print("Month: ");
+  Serial.println(months[currentMonth - 1]);
+  scroll_msg(months[currentMonth - 1]);
+}
+
+void printDayOfMonth() {
+  int dayOfMonth = day();  // Get the current day of the month
+  
+  // Create a 4-character padded string (2 spaces + 2-digit day)
+  char dayStr[5]; // 4 chars + null terminator
+  sprintf(dayStr, "  %02d", dayOfMonth); // Pads with two spaces
+  
+  Serial.print("Day of the month (padded): ");
+  Serial.println(dayStr);
+
+  // Scroll the padded day on the second alphanumeric display
+  scroll_msg2(dayStr);
 }
